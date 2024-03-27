@@ -1,10 +1,12 @@
 package rs.ac.ni.pmf.web.students.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import rs.ac.ni.pmf.web.students.exceptions.NoStudentWithSuchId;
 import rs.ac.ni.pmf.web.students.model.dto.StudentDTO;
 import rs.ac.ni.pmf.web.students.repository.StudentsRepository;
+import rs.ac.ni.pmf.web.students.service.StudentsService;
 
 import java.util.List;
 @RestController
@@ -16,42 +18,44 @@ public class StudentsController {
     /*
         GET http://localhost:8080/students
          */
-    @GetMapping("/students")
-    public List<StudentDTO> getAllStudents() {
-        return StudentsRepository.studentsRepository;
+    private final StudentsService studentsService;
+    @Autowired
+    public StudentsController(StudentsService studentsService) {
+
+        this.studentsService = studentsService;
     }
-    @GetMapping("/students/{id}")
-    public StudentDTO getStudent(@PathVariable int id) {
-        return findStudentById(id);
+
+    /*
+    GET http://localhost:8080/students
+     */
+    @GetMapping("/students")
+    public List<StudentDTO> allStudents() {
+       return studentsService.getAll();
+    }
+
+    /*
+        GET http://localhost:8080/student/id
+        */
+    @GetMapping("/students/{index}")
+    public StudentDTO getStudentByIndex(@PathVariable("index") final int id) {
+        return studentsService.findStudentByIndex(id);
+    }
+    //@RequestMapping(produces = MediaType.APPLICATION_XML_VALUE)
+    @GetMapping("/students-xml/{index}")
+    public StudentDTO getStudentById(@PathVariable final int index) {
+        return  studentsService.findStudentByIndex(index);
     }
     @PostMapping("/students")
-    public StudentDTO createStudent(@RequestBody StudentDTO student) {
-        StudentsRepository.studentsRepository.add(student);
-        return student;
+    public StudentDTO createStudent(@RequestBody StudentDTO studentDTO) {
+        return studentsService.save(studentDTO);
     }
     @PutMapping("/students/{id}")
-    public StudentDTO update(@PathVariable int id, @RequestBody StudentDTO updatedStudent) {
-        StudentDTO studentToUpdate = StudentsRepository.studentsRepository.stream()
-                .filter(student -> student.getId() == id)
-                .findFirst()
-                .orElseThrow(() -> new NoStudentWithSuchId(id));
-        studentToUpdate.setName(updatedStudent.getName());
-        studentToUpdate.setYearOfStudy(updatedStudent.getYearOfStudy());
-        return updatedStudent;
+    public StudentDTO update(@RequestBody StudentDTO studentDTO, @PathVariable("id") int id) {
+        return studentsService.update(studentDTO,id);
     }
     @DeleteMapping("/students/{id}")
     public StudentDTO remove(@PathVariable int id) {
-        StudentDTO student = findStudentById(id);
-        StudentsRepository.studentsRepository.remove(student);
-        return student;
-    }
-
-
-    private StudentDTO findStudentById(int id) {
-        return StudentsRepository.studentsRepository.stream()
-                .filter(student -> student.getId() == id)
-                .findFirst()
-                .orElseThrow(() -> new NoStudentWithSuchId(id));
+        return studentsService.remove(id);
     }
 
 
