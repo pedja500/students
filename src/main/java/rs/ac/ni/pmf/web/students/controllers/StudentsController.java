@@ -30,7 +30,7 @@ public class StudentsController {
      */
     @GetMapping("/students")
     public List<StudentDTO> allStudents() {
-       return studentsService.getAll();
+        return studentsService.getAll();
     }
 
     /*

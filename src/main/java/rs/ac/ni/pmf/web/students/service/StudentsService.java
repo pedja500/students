@@ -32,15 +32,17 @@ public class StudentsService {
     }
 
     public StudentDTO findStudentByIndex(final int id) {
-        return StudentsRepository.studentsRepository.stream()
-                .filter(studentDTO -> studentDTO.getId() == id)
-                .findFirst()
-                .orElseThrow(() -> new NoStudentWithSuchId(id));
+        return StudentsMapper.toDto(studentRepository.findById(id).orElseThrow(null));
+//        return StudentsRepository.studentsRepository.stream()
+//                .filter(studentDTO -> studentDTO.getId() == id)
+//                .findFirst()
+//                .orElseThrow(() -> new NoStudentWithSuchId(id));
     }
     public StudentDTO save(StudentDTO studentDTO) {
+        StudentEntity student = StudentsMapper.toEntity(studentDTO);
         studentRepository.save(StudentsMapper.toEntity(studentDTO));
 //        StudentsRepository.studentsRepository.add(studentDTO);
-        return studentDTO;
+        return StudentsMapper.toDto(student);
     }
 
     public StudentDTO remove(Integer id) {
